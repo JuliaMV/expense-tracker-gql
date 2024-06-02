@@ -1,6 +1,5 @@
-import { users } from "../dummyData/data.js";
 import User from "../models/user.model.js";
-
+import Transaction from "../models/transaction.model.js";
 import bcrypt from "bcryptjs";
 
 const userResolver = {
@@ -40,7 +39,7 @@ const userResolver = {
         const hashedPassword = await bcrypt.hash(password, salt);
         // https://avatar-placeholder.iran.liara.run/
         const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-        const girlProfilePic = ``;
+        const girlProfilePic = `https://avatar.iran.liara.run/public/girls?username=${username}`;
 
         const newUser = new User({
           username,
@@ -86,6 +85,17 @@ const userResolver = {
         return { message: "Logged out successfully" };
       } catch (error) {
         console.error("Error in logout", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
+  },
+  User: {
+    transactions: async (parent, args, context) => {
+      try {
+        const transactions = await Transaction.find({ userId: parent._id });
+        return transactions;
+      } catch (error) {
+        console.error("Error in user.transaction resolver", error);
         throw new Error(error.message || "Internal server error");
       }
     },

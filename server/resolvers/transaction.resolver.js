@@ -1,4 +1,5 @@
 import Transaction from "../models/transaction.model.js";
+import User from "../models/user.model.js";
 
 const transactionResolver = {
   Query: {
@@ -17,14 +18,37 @@ const transactionResolver = {
     },
     transaction: async (_, { transactionId }) => {
       try {
-        const transaction = Transaction.findById(transactionId);
+        const transaction = await Transaction.findById(transactionId);
         return transaction;
       } catch (error) {
         console.error("Error in getting transaction: ", error);
         throw new Error(error.message || "Internal server error");
       }
     },
-    // TODO add category statistics query
+    categoryStatistics: async (_, __, context) => {
+      try {
+        if (!context.getUser()) {
+          throw new Error("Unauthorized");
+        }
+        const userId = await context.getUser()._id;
+        const transactions = await Transaction.find({ userId });
+        const categoryMap = {};
+        transactions.forEach((item) => {
+          if (!categoryMap[item.category]) {
+            categoryMap[item.category] = 0;
+          }
+          categoryMap[item.category] += item.amount;
+        });
+
+        return Object.entries(categoryMap).map(([category, amount]) => ({
+          category,
+          totalAmount: amount,
+        }));
+      } catch (error) {
+        console.error("Error in getting statistic: ", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
   },
   Mutation: {
     createTransaction: async (_, { input }, context) => {
@@ -64,7 +88,18 @@ const transactionResolver = {
         throw new Error(error.message || "Internal server error");
       }
     },
-    // todo: add transaction/user relationship
+  },
+  Transaction: {
+    user: async (parent, args, context) => {
+      try {
+        const userId = parent.userId; // parent is transaction
+        const user = await User.findById(userId);
+        return user;
+      } catch (error) {
+        console.error("Error in transaction.user resolver", error);
+        throw new Error(error.message || "Internal server error");
+      }
+    },
   },
 };
 
