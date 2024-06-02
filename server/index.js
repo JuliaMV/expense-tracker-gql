@@ -14,6 +14,7 @@ import { buildContext } from "graphql-passport";
 
 import mergedResolvers from "./resolvers/index.js";
 import mergedTypeDefs from "./typeDefs/index.js";
+
 import { connectDB } from "./db/connectDB.js";
 import { configurePassport } from "./passport/passport.config.js";
 
@@ -30,6 +31,7 @@ const store = new MongoDBStore({
 });
 
 store.on("error", (error) => console.log(error));
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -47,8 +49,8 @@ app.use(passport.session());
 
 const server = new ApolloServer({
   typeDefs: mergedTypeDefs,
-  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   resolvers: mergedResolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 // Ensure we wait for our server to start
 await server.start();
@@ -56,9 +58,9 @@ await server.start();
 // Set up our Express middleware to handle CORS, body parsing,
 // and our expressMiddleware function.
 app.use(
-  "/",
+  "/graphql",
   cors({
-    origin: "http://localhost:4000",
+    origin: ["http://localhost:4000", "http://localhost:3000"],
     credentials: true,
   }),
   express.json(),

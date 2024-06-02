@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: true,
-      uniq: true,
+      unique: true,
     },
     name: {
       type: String,
@@ -19,14 +19,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    name: {
+    gender: {
       type: String,
       enum: ["male", "female"],
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const User = mongoose.model("User", userSchema);
