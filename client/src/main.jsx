@@ -9,7 +9,10 @@ import GridBackground from "./components/ui/GridBackground.jsx";
 
 const client = new ApolloClient({
   // todo: update uri to production
-  uri: "http://localhost:4000/graphql",
+  uri:
+    import.meta.VITE_NODE_ENV === "development"
+      ? "http://localhost:4000/graphql"
+      : "/graphql",
   cache: new InMemoryCache(),
   credentials: "include",
 });
